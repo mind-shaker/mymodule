@@ -1,0 +1,518 @@
+{% set title = "Matching & Cleanup MODULE" %}
+
+{% extends "_layouts/cp" %}
+
+{% block content %}
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    
+    * {
+        font-family: 'Roboto', sans-serif;
+    }
+    
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, rgba(60, 60, 60, 1) 0%, rgba(59, 59, 59, 1) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dashboard-header p {
+        color: #6b7280;
+        font-size: 1rem;
+    }
+    
+    .controls-section {
+        background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .control-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .control-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+    
+    .control-card h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1f2937;
+    }
+    
+    .btn-custom {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, rgba(30, 30, 31, 1) 0%, rgba(65, 65, 65, 1) 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, rgba(30, 30, 30, 1) 0%, rgba(41, 41, 41, 1) 100%);
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+    }
+    
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border-radius: 8px;
+    }
+    
+    .checkbox-wrapper input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    
+    .checkbox-wrapper label {
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+        margin: 0;
+    }
+    
+    .audit-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .audit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .audit-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .audit-timestamp {
+        font-family: 'JetBrains Mono', monospace;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, rgba(47, 47, 47, 1) 0%, rgba(52, 52, 52, 1) 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #e5e7eb;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .stat-label {
+        color: #d8d8d8ff;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .stat-card.success .stat-number {
+        color: rgba(235, 235, 235, 1);
+    }
+    
+    .stat-card.warning .stat-number {
+        color: rgba(232, 232, 232, 1);
+    }
+    
+    .stat-card.danger .stat-number {
+        color: #ffffffff;
+    }
+    
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .result-panel {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #7f7f7fff;
+    }
+    
+    .result-panel h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .result-panel.success h3 {
+        color: rgba(50, 50, 50, 1);
+    }
+    
+    .result-panel.warning h3 {
+        color: rgba(32, 32, 32, 1);
+    }
+    
+    .result-panel.danger h3 {
+        color: rgba(33, 33, 33, 1);
+    }
+    
+    .result-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .result-list::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .result-list::-webkit-scrollbar-track {
+        background: #e5e7eb;
+        border-radius: 4px;
+    }
+    
+    .result-list::-webkit-scrollbar-thumb {
+        background: #9ca3af;
+        border-radius: 4px;
+    }
+    
+    .result-list li {
+        background: white;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-radius: 8px;
+        border-left: 4px solid;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+    
+    .result-panel.success .result-list li {
+        border-left-color: rgba(0, 0, 0, 1);
+    }
+    
+    .result-panel.warning .result-list li {
+        border-left-color: rgba(0, 0, 0, 1);
+    }
+    
+    .result-panel.danger .result-list li {
+        border-left-color: rgba(152, 152, 152, 1);
+    }
+    
+    .result-list li:hover {
+        transform: translateX(4px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .match-arrow {
+        color: #667eea;
+        font-weight: bold;
+        margin: 0 0.5rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #cbcbcbff;
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .mode-indicator {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    
+    .mode-indicator.dry-run {
+        background: #ffffffff;
+        color: #c40d0dff;
+        border: 1px solid rgba(31, 31, 31, 1);
+    }
+    
+    .mode-indicator.live {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #2d2d2dff;
+    }
+    
+    .clear-logs-btn {
+        padding: 0.5rem 1rem;
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .clear-logs-btn:hover {
+        background: #e5e7eb;
+        border-color: #9ca3af;
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>{{ title }}</h1>
+        <p>Automatic thumbnail matching and cleaning thumbnail assets</p>
+    </div>
+
+    <div class="controls-section">
+        <div class="checkbox-wrapper">
+            <input type="checkbox" id="dry-run-checkbox" checked>
+            <label for="dry-run-checkbox">Dry Run Mode (view without saving changes)</label>
+        </div>
+
+        <div class="controls-grid">
+            <div class="control-card">
+                <h3>Matching thumbnails </h3>
+                <button id="match-thumbnails" class="btn-custom btn-primary">START PROCESS</button>
+            </div>
+
+            <div class="control-card">
+                <h3>🗑️ Cleanup thumbnail asset </h3>
+                <button id="clean-thumbnails" class="btn-custom btn-danger">START PROCESS</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="audit-results" class="audit-section">
+        {% if latestLog %}
+            {% set log = latestLog %}
+            <div class="audit-header">
+                <h2> Matching Results Audit</h2>
+                <div>
+                    <button id="clear-logs" class="clear-logs-btn">Clear Logs 🗑️</button>
+                    <div class="audit-timestamp">Last run: {{ log.timestamp }}</div>
+                </div>
+            </div>
+
+            {% if log.dryRun %}
+                <div class="mode-indicator dry-run"> Dry Run Mode - No Changes Saved</div>
+            {% else %}
+                <div class="mode-indicator live">☑️ Live Mode - Changes Saved</div>
+            {% endif %}
+
+            {% if log.type == 'matching' %}
+                <div class="stats-grid">
+                    <div class="stat-card success">
+
+                        <div class="stat-number">{{ log.stats.matchedCount }}</div>
+                        <div class="stat-label">Matches Found</div>
+                    </div>
+                    <div class="stat-card warning">
+
+                        <div class="stat-number">{{ log.stats.unmatchedCount }}</div>
+                        <div class="stat-label">Unmatched Files</div>
+                    </div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-panel success">
+                        <h3>☑️ Successful Matches</h3>
+                        {% if log.matched|length > 0 %}
+                            <ul class="result-list">
+                                {% for match in log.matched %}
+                                    <li>{{ match.video }}<span class="match-arrow">↔️</span>{{ match.thumbnail }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p style="text-align: center; color: #9ca3af; padding: 1rem;">No matches found</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="result-panel warning">
+                        <h3>❌ Unmatched Files</h3>
+                        {% if log.unmatched|length > 0 %}
+                            <ul class="result-list">
+                                {% for file in log.unmatched %}
+                                    <li>● {{ file }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p style="text-align: center; color: #9ca3af; padding: 1rem;">All files matched!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if log.type == 'cleanup' %}
+                <div class="stats-grid">
+                    <div class="stat-card danger">
+
+                        <div class="stat-number">{{ log.stats.movedCount }}</div>
+                        <div class="stat-label">Files Moved to Backup</div>
+                    </div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-panel danger">
+                        <h3>📦 Files Moved to Backup</h3>
+                        {% if log.moved|length > 0 %}
+                            <ul class="result-list">
+                                {% for file in log.moved %}
+                                    <li>{{ file }} → /backup/{{ file }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p style="text-align: center; color: #9ca3af; padding: 1rem;">No unused thumbnails found</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <h3>No audit logs yet</h3>
+                <p>Run matching or cleanup to see results here</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% js %}
+// Match Thumbnails
+document.getElementById('match-thumbnails').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    const dryRun = document.getElementById('dry-run-checkbox').checked;
+    
+    Craft.postActionRequest('mymodule/default/match-thumbnails', {
+        dryRun: dryRun
+    }, function(response, textStatus) {
+        if (response.success) {
+            location.reload(); // Перезавантажуємо сторінку щоб показати новий лог
+        } else {
+            alert('Error: ' + (response.error || 'Unknown error'));
+        }
+    });
+});
+
+// Clean Thumbnails
+document.getElementById('clean-thumbnails').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    const dryRun = document.getElementById('dry-run-checkbox').checked;
+
+    Craft.postActionRequest('mymodule/default/clean-thumbnails', {
+        dryRun: dryRun
+    }, function(response, textStatus) {
+        if (response.success) {
+            location.reload(); // Перезавантажуємо сторінку щоб показати новий лог
+        } else {
+            alert('Error: ' + (response.error || 'Unknown error'));
+        }
+    });
+});
+
+// Clear Logs
+{% if latestLog %}
+document.getElementById('clear-logs').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    if (confirm('Are you sure you want to clear all audit logs?')) {
+        Craft.postActionRequest('mymodule/default/clear-logs', {}, function(response) {
+            if (response.success) {
+                location.reload();
+            } else {
+                alert('Error clearing logs');
+            }
+        });
+    }
+});
+{% endif %}
+{% endjs %}
+{% endblock %}
